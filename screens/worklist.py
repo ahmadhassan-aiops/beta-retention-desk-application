@@ -86,47 +86,47 @@ def render() -> None:
                       if len(act) else "", t.TEAL))
     ui.kpis(items)
 
-    ui.section("01", "Today's queue", f"top {QUEUE} by {sort.lower()}")
-    cols = st.columns(3)
-    for i, (_, r) in enumerate(view.head(QUEUE).iterrows()):
-        with cols[i % 3].container(border=True):
-            ui.customer_card(str(r["Surname"]), int(r["CustomerId"]), r["Geography"], r["status"], float(r["proba"]),
-                             float(r["Balance"]), r["reasons"])
-            if st.button("Open file", key=f"open_{r['CustomerId']}_{i}", icon=":material/folder_open:",
-                         on_click=_open, args=(r["CustomerId"],), width="stretch", disabled=not known):
-                from nav import FILE
-                st.switch_page(FILE)
+    with ui.panel("01", "Today's queue", f"top {QUEUE} by {sort.lower()}"):
+        cols = st.columns(3)
+        for i, (_, r) in enumerate(view.head(QUEUE).iterrows()):
+            with cols[i % 3].container(border=True):
+                ui.customer_card(str(r["Surname"]), int(r["CustomerId"]), r["Geography"], r["status"], float(r["proba"]),
+                                 float(r["Balance"]), r["reasons"])
+                if st.button("Open file", key=f"open_{r['CustomerId']}_{i}", icon=":material/folder_open:",
+                             on_click=_open, args=(r["CustomerId"],), width="stretch", disabled=not known):
+                    from nav import FILE
+                    st.switch_page(FILE)
 
-    ui.section("02", "Where the deposits at risk sit", "size = chance × balance · colour = average chance")
-    charts.show(charts.treemap(view), "treemap")
-    by_c = view.groupby("Geography")["at_risk"].sum().sort_values(ascending=False)
-    if len(by_c):
-        ui.caveat(f"<b>{by_c.index[0]}</b> holds {by_c.iloc[0] / by_c.sum():.0%} of the deposits at risk in this view. "
-                  "Customers with a zero balance put no deposits at risk, so they appear only when ranking by chance.")
+    with ui.panel("02", "Where the deposits at risk sit", "size = chance × balance · colour = average chance"):
+        charts.show(charts.treemap(view), "treemap")
+        by_c = view.groupby("Geography")["at_risk"].sum().sort_values(ascending=False)
+        if len(by_c):
+            ui.caveat(f"<b>{by_c.index[0]}</b> holds {by_c.iloc[0] / by_c.sum():.0%} of the deposits at risk in this view. "
+                      "Customers with a zero balance put no deposits at risk, so they appear only when ranking by chance.")
 
-    ui.section("03", "Full list", "select a row to open the customer's file")
-    table = view.assign(Name=view["Surname"], Chance=view["proba"] * 100, Why=view["reasons"].map(", ".join))
-    cols_show = ["CustomerId", "Name", "status", "Chance", "at_risk", "Balance", "Geography", "Age", "NumOfProducts",
-                 "IsActiveMember", "Why"] + (["exited"] if known else [])
-    event = st.dataframe(
-        table[cols_show], hide_index=True, height=420, width="stretch", on_select="rerun",
-        selection_mode="single-row", key="wl_table",
-        column_config={
-            "CustomerId": st.column_config.NumberColumn("ID", format="%d"),
-            "status": "Status",
-            "Chance": st.column_config.ProgressColumn("Chance of leaving", min_value=0, max_value=100, format="%.0f%%"),
-            "at_risk": st.column_config.NumberColumn("At risk", format="compact"),
-            "Balance": st.column_config.NumberColumn(format="compact"),
-            "Geography": "Country", "NumOfProducts": "Products",
-            "IsActiveMember": st.column_config.CheckboxColumn("Active"),
-            "Why": "Main reasons", "exited": st.column_config.CheckboxColumn("Actually left"),
-        },
-    )
-    rows = event.selection.rows if event else []
-    if rows and known:
-        _open(table.iloc[rows[0]]["CustomerId"])
-        from nav import FILE
-        st.switch_page(FILE)
-    st.download_button("Download the scored list (CSV)", view.drop(columns=["reasons"]).to_csv(index=False).encode(),
-                       "retention_worklist.csv", "text/csv", icon=":material/download:")
+    with ui.panel("03", "Full list", "select a row to open the customer's file"):
+        table = view.assign(Name=view["Surname"], Chance=view["proba"] * 100, Why=view["reasons"].map(", ".join))
+        cols_show = ["CustomerId", "Name", "status", "Chance", "at_risk", "Balance", "Geography", "Age", "NumOfProducts",
+                     "IsActiveMember", "Why"] + (["exited"] if known else [])
+        event = st.dataframe(
+            table[cols_show], hide_index=True, height=420, width="stretch", on_select="rerun",
+            selection_mode="single-row", key="wl_table",
+            column_config={
+                "CustomerId": st.column_config.NumberColumn("ID", format="%d"),
+                "status": "Status",
+                "Chance": st.column_config.ProgressColumn("Chance of leaving", min_value=0, max_value=100, format="%.0f%%"),
+                "at_risk": st.column_config.NumberColumn("At risk", format="compact"),
+                "Balance": st.column_config.NumberColumn(format="compact"),
+                "Geography": "Country", "NumOfProducts": "Products",
+                "IsActiveMember": st.column_config.CheckboxColumn("Active"),
+                "Why": "Main reasons", "exited": st.column_config.CheckboxColumn("Actually left"),
+            },
+        )
+        rows = event.selection.rows if event else []
+        if rows and known:
+            _open(table.iloc[rows[0]]["CustomerId"])
+            from nav import FILE
+            st.switch_page(FILE)
+        st.download_button("Download the scored list (CSV)", view.drop(columns=["reasons"]).to_csv(index=False).encode(),
+                           "retention_worklist.csv", "text/csv", icon=":material/download:")
     ui.footer()

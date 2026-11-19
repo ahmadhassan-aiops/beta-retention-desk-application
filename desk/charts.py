@@ -10,7 +10,7 @@ import streamlit as st
 from desk import theme as t
 
 CONFIG = {"displayModeBar": False, "scrollZoom": False}
-RAMP = [[0, t.PANEL_2], [0.35, "#5a3a33"], [0.7, "#c9583d"], [1, t.CORAL]]
+RAMP = [[0, "#f6f7f9"], [0.35, "#f6cfc3"], [0.7, "#e98a6d"], [1, t.CORAL]]
 
 
 def show(fig: go.Figure, key: str) -> None:
@@ -83,12 +83,12 @@ def treemap(df: pd.DataFrame) -> go.Figure:
     counts = list(country.loc[g["Geography"].unique(), "n"]) + list(g["n"])
     fig = go.Figure(go.Treemap(
         ids=ids, labels=labels, parents=parents, values=values, branchvalues="total",
-        marker=dict(colors=colors, colorscale=RAMP, cmin=0, cmax=0.8, line=dict(color=t.BG, width=2)),
+        marker=dict(colors=colors, colorscale=RAMP, cmin=0, cmax=0.8, line=dict(color="#ffffff", width=2)),
         customdata=np.array([counts, colors]).T,
         texttemplate="<b>%{label}</b><br>%{value:,.3s} at risk",
         hovertemplate="<b>%{label}</b><br>Deposits at risk %{value:,.0f}<br>%{customdata[0]:,} customers<br>"
                       "Average chance of leaving %{customdata[1]:.0%}<extra></extra>",
-        textfont=dict(family=t.MONO, color=t.TEXT),
+        textfont=dict(family=t.MONO, color=t.TEXT), root_color="#ffffff", pathbar=dict(visible=False),
     ))
     style(fig, height=360)
     fig.update_layout(margin=dict(l=4, r=4, t=4, b=4))
@@ -117,7 +117,7 @@ def heat(rates: pd.DataFrame, counts: pd.DataFrame, x_title: str, y_title: str, 
     text = [[f"<b>{r:.0%}</b><br>{c:,}" if c else "" for r, c in zip(zr, zc)] for zr, zc in zip(z, n)]
     fig = go.Figure(go.Heatmap(
         z=z, x=[str(c) for c in rates.columns], y=[str(i) for i in rates.index], zmin=0, zmax=1, colorscale=RAMP,
-        showscale=False, xgap=3, ygap=3, text=text, texttemplate="%{text}", textfont=dict(family=t.MONO, color=t.TEXT, size=12),
+        showscale=False, xgap=3, ygap=3, text=text, texttemplate="%{text}", textfont=dict(family=t.MONO, size=12),
         customdata=n, hovertemplate=f"{y_title} %{{y}} · {x_title} %{{x}}<br>%{{z:.0%}} left of %{{customdata:,}}<extra></extra>",
     ))
     style(fig, height=height)
@@ -167,7 +167,8 @@ def confusion(tn: int, fp: int, fn: int, tp: int) -> go.Figure:
     total = tn + fp + fn + tp
     for r, row in enumerate(["Stayed", "Left"]):
         for c, col in enumerate(["Left alone", "Contacted"]):
-            fig.add_annotation(x=col, y=row, showarrow=False, font=dict(family=t.MONO, color=t.TEXT, size=11),
+            fig.add_annotation(x=col, y=row, showarrow=False,
+                               font=dict(family=t.MONO, color="#ffffff" if shade[r][c] > 0.65 else t.TEXT, size=11),
                                text=f"<b>{z[r][c]:,}</b><br>{names[r][c]}<br>{z[r][c] / total:.1%}")
     style(fig, height=320)
     fig.update_yaxes(autorange="reversed", showgrid=False, title="What happened")
@@ -180,10 +181,10 @@ def roc(fpr: np.ndarray, tpr: np.ndarray, auc: float, point: tuple[float, float]
     fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines", name="Random", line=dict(color=t.DIM, dash="dot"),
                              hoverinfo="skip"))
     fig.add_trace(go.Scatter(x=fpr, y=tpr, mode="lines", name=f"XGBoost (AUC {auc:.3f})", line=dict(color=t.CORAL, width=3),
-                             fill="tozeroy", fillcolor="rgba(255,122,89,0.08)",
+                             fill="tozeroy", fillcolor="rgba(212,70,42,0.07)",
                              hovertemplate="False alarms %{x:.0%}<br>Leavers caught %{y:.0%}<extra></extra>"))
     fig.add_trace(go.Scatter(x=[point[0]], y=[point[1]], mode="markers", name="Chosen threshold",
-                             marker=dict(size=12, color=t.TEXT, line=dict(color=t.BG, width=2))))
+                             marker=dict(size=12, color=t.TEXT, line=dict(color="#ffffff", width=2))))
     style(fig, height=340, legend=True)
     fig.update_xaxes(title="Share of stayers wrongly flagged", tickformat=".0%", range=[0, 1], showgrid=True)
     fig.update_yaxes(title="Share of leavers caught", tickformat=".0%", range=[0, 1.02])

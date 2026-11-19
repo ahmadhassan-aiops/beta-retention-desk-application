@@ -1,9 +1,11 @@
-"""Retention Desk components: console page titles, KPI strip, customer cards, LED risk meter, profile sheet,
-lever rows, briefing notes and the footer. Dark theme, Space Grotesk headings, JetBrains Mono figures."""
+"""Retention Desk components: console page titles, numbered panels, KPI strip, customer cards, LED risk meter, profile
+sheet, lever rows, takeaway notes and the footer. Light theme, Space Grotesk headings, JetBrains Mono figures.
+Every block of information sits in its own bordered, numbered panel."""
 
 from __future__ import annotations
 
 import html
+from contextlib import contextmanager
 
 import streamlit as st
 
@@ -22,8 +24,11 @@ h1, h2, h3 {{ font-family: var(--display); letter-spacing: -0.02em; }}
 .msr {{ font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal; line-height: 1; display: inline-block;
         -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased; }}
 [data-testid="stSidebar"] {{ border-right: 1px solid var(--line); }}
-[data-testid="stVerticalBlockBorderWrapper"] {{ border-color: var(--line) !important; border-radius: 10px !important;
-                                              background: var(--panel); }}
+[data-testid="stAppViewContainer"], [data-testid="stMain"] {{ background: var(--bg); }}
+[data-testid="stSidebar"] {{ background: #ffffff; }}
+[data-testid="stVerticalBlockBorderWrapper"] {{ border-color: var(--line) !important; border-radius: 12px !important;
+                                              background: var(--panel); box-shadow: 0 1px 2px rgba(20, 26, 34, .05); }}
+.st-key-panel {{ margin-bottom: .4rem; }}
 
 /* Page title: breadcrumb, display title, one-line brief */
 .crumb {{ font-family: var(--mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--dim);
@@ -34,9 +39,10 @@ h1, h2, h3 {{ font-family: var(--display); letter-spacing: -0.02em; }}
 .pbrief b {{ color: var(--text); font-weight: 600; }}
 
 /* Section label */
-.sec {{ display: flex; align-items: baseline; gap: .7rem; margin: 1.6rem 0 .6rem; border-bottom: 1px solid var(--line);
-        padding-bottom: .45rem; }}
-.sec-n {{ font-family: var(--mono); color: var(--coral); font-size: .8rem; font-weight: 700; }}
+.sec {{ display: flex; align-items: baseline; gap: .7rem; margin: .1rem 0 .7rem; border-bottom: 1px solid var(--line);
+        padding-bottom: .55rem; }}
+.sec-n {{ font-family: var(--mono); color: #fff; background: var(--coral); font-size: .75rem; font-weight: 700;
+          border-radius: 5px; padding: .1rem .4rem; }}
 .sec-t {{ font-family: var(--display); font-size: 1.2rem; font-weight: 600; color: var(--text); margin: 0; }}
 .sec-s {{ color: var(--dim); font-size: .85rem; margin-left: auto; text-align: right; }}
 
@@ -44,7 +50,7 @@ h1, h2, h3 {{ font-family: var(--display); letter-spacing: -0.02em; }}
 .kpis {{ display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 1px; background: var(--line);
          border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 0 0 1.2rem; }}
 @media (max-width: 800px) {{ .kpis {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }} }}
-.kpi {{ background: var(--panel); padding: .85rem 1rem .8rem; position: relative; }}
+.kpi {{ background: var(--panel); padding: .85rem 1rem .8rem .95rem; position: relative; }}
 .kpi::before {{ content: ""; position: absolute; left: 0; top: .9rem; bottom: .9rem; width: 3px; border-radius: 2px;
                background: var(--c, var(--blue)); }}
 .kpi-l {{ font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin: 0; }}
@@ -58,7 +64,7 @@ h1, h2, h3 {{ font-family: var(--display); letter-spacing: -0.02em; }}
 .pill .msr {{ font-size: 14px; }}
 .tag {{ display: inline-block; font-size: .74rem; color: var(--muted); background: var(--panel2); border: 1px solid var(--line);
         border-radius: 4px; padding: .1rem .4rem; margin: .15rem .25rem 0 0; }}
-.tag.up {{ color: #ffb39f; border-color: #5a2e24; }}
+.tag.up {{ color: #9c2f18; background: #fcece7; border-color: #f2c7bb; }}
 
 /* Customer card */
 .card-top {{ display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; }}
@@ -73,7 +79,7 @@ h1, h2, h3 {{ font-family: var(--display); letter-spacing: -0.02em; }}
 /* LED risk meter */
 .leds {{ display: grid; grid-template-columns: repeat(25, minmax(0, 1fr)); gap: 3px; margin: .55rem 0 .3rem; }}
 .led {{ height: 20px; border-radius: 2px; background: var(--panel2); border: 1px solid var(--line); }}
-.led.on {{ background: var(--c); border-color: var(--c); box-shadow: 0 0 8px color-mix(in srgb, var(--c) 45%, transparent); }}
+.led.on {{ background: var(--c); border-color: var(--c); }}
 .led.mark {{ outline: 2px solid var(--text); outline-offset: 1px; }}
 .led-scale {{ display: flex; justify-content: space-between; font-family: var(--mono); font-size: .68rem; color: var(--dim); }}
 .big-risk {{ font-family: var(--mono); font-size: 3.4rem; font-weight: 700; line-height: 1; color: var(--c); margin: .35rem 0 0; }}
@@ -103,7 +109,8 @@ h1, h2, h3 {{ font-family: var(--display); letter-spacing: -0.02em; }}
 .play-t {{ color: var(--text); font-size: .98rem; line-height: 1.55; margin: .3rem 0 0; }}
 
 /* Briefing notes */
-.notes {{ counter-reset: n; display: grid; gap: .55rem; margin: .3rem 0 1rem; }}
+.notes {{ counter-reset: n; display: grid; gap: .55rem; margin: .5rem 0 .2rem; background: var(--panel2);
+          border: 1px solid var(--line); border-left: 3px solid var(--coral); border-radius: 8px; padding: .75rem .9rem; }}
 .note {{ display: grid; grid-template-columns: 2.2rem 1fr; gap: .4rem; align-items: start; color: var(--muted); font-size: .95rem;
          line-height: 1.55; }}
 .note::before {{ counter-increment: n; content: counter(n, decimal-leading-zero); font-family: var(--mono); color: var(--coral);
@@ -159,6 +166,14 @@ def title(crumb: str, text: str, brief: str) -> None:
 def section(n: str, text: str, sub: str = "") -> None:
     st.html(f'<div class="sec"><span class="sec-n">{html.escape(n)}</span><p class="sec-t">{html.escape(text)}</p>'
             f'<span class="sec-s">{html.escape(sub)}</span></div>')
+
+
+@contextmanager
+def panel(n: str, text: str, sub: str = ""):
+    """A bordered panel with a numbered heading; everything inside the `with` block belongs to it."""
+    with st.container(border=True):
+        section(n, text, sub)
+        yield
 
 
 def kpis(items: list[tuple[str, str, str, str]]) -> None:

@@ -8,9 +8,9 @@ gatherUsageStats = false
 toolbarMode = "minimal"
 
 [theme]
-base = "dark"
-primaryColor = "#ff7a59"
-backgroundColor = "#0e1217"
-secondaryBackgroundColor = "#161c24"
-textColor = "#e7eaee"
+base = "light"
+primaryColor = "#d4462a"
+backgroundColor = "#f4f6f9"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#141a22"
 font = "sans serif"

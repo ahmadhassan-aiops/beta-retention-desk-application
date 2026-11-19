@@ -39,57 +39,57 @@ def render() -> None:
         ("Top 20% of scores", f"{top20:.0%}", "of all leavers", "#ff7a59"),
     ])
 
-    ui.section("01", "Move the act line", "F1, recall and precision on held-out customers")
-    th = st.slider("Act on customers at or above", 0.05, 0.90, m.threshold, 0.01, key="sc_t")
-    a, b = st.columns([1.3, 1], gap="large")
-    with a:
-        charts.show(charts.threshold_curves(_curve(y, p), th, 0.59), "curves")
-    with b:
-        tn, fp, fn, tp = confusion_matrix(y, p >= th).ravel()
-        charts.show(charts.confusion(tn, fp, fn, tp), "cm")
-    ui.notes([f"At {th:.2f} the desk contacts <b>{tp + fp}</b> customers and catches <b>{tp} of {tp + fn}</b> leavers "
-              f"(F1 {f1_score(y, p >= th):.3f}). At the default 0.50 it would catch only "
-              f"{int(((p >= 0.5) & (y == 1)).sum())}."])
+    with ui.panel("01", "Move the act line", "F1, recall and precision on held-out customers"):
+        th = st.slider("Act on customers at or above", 0.05, 0.90, m.threshold, 0.01, key="sc_t")
+        a, b = st.columns([1.3, 1], gap="large")
+        with a:
+            charts.show(charts.threshold_curves(_curve(y, p), th, 0.59), "curves")
+        with b:
+            tn, fp, fn, tp = confusion_matrix(y, p >= th).ravel()
+            charts.show(charts.confusion(tn, fp, fn, tp), "cm")
+        ui.notes([f"At {th:.2f} the desk contacts <b>{tp + fp}</b> customers and catches <b>{tp} of {tp + fn}</b> leavers "
+                  f"(F1 {f1_score(y, p >= th):.3f}). At the default 0.50 it would catch only "
+                  f"{int(((p >= 0.5) & (y == 1)).sum())}."])
 
     a, b = st.columns(2, gap="large")
     with a:
-        ui.section("02", "Ranking", "ROC curve")
-        fpr, tpr, _ = roc_curve(y, p)
-        point = (fp / (fp + tn), tp / (tp + fn))
-        charts.show(charts.roc(fpr, tpr, roc_auc_score(y, p), point), "roc")
+        with ui.panel("02", "Ranking", "ROC curve"):
+            fpr, tpr, _ = roc_curve(y, p)
+            point = (fp / (fp + tn), tp / (tp + fn))
+            charts.show(charts.roc(fpr, tpr, roc_auc_score(y, p), point), "roc")
     with b:
-        ui.section("03", "Can the chances be trusted?", "out-of-fold calibration")
-        c = ref["calibration"]
-        charts.show(charts.calibration(c["predicted"], c["observed"], c["customers"]), "cal")
-    ui.notes(["The scores are calibrated: customers given about 40% left about 40% of the time, so the desk can use "
-              "them as real chances and multiply by balances to get deposits at risk."])
+        with ui.panel("03", "Can the chances be trusted?", "out-of-fold calibration"):
+            c = ref["calibration"]
+            charts.show(charts.calibration(c["predicted"], c["observed"], c["customers"]), "cal")
+            ui.notes(["The scores are calibrated: customers given about 40% left about 40% of the time, so the desk can use "
+                      "them as real chances and multiply by balances to get deposits at risk."])
 
-    ui.section("04", "How the imbalance was handled", "best out-of-fold F1 per approach, 5-fold cross-validation")
-    a, b = st.columns([1.3, 1], gap="large")
-    with a:
-        st.dataframe(pd.DataFrame(ref["balancing"]), hide_index=True, width="stretch",
-                     column_config={"Best F1": st.column_config.NumberColumn(format="%.3f"),
-                                    "AUC-ROC": st.column_config.NumberColumn(format="%.3f")})
-    with b:
-        ui.notes(["Only 20% of customers leave. SMOTE, undersampling and class weights were compared, each inside the "
-                  "cross-validation folds, against simply <b>moving the threshold</b>.",
-                  "Moving the threshold was as good as any resampling, and keeps the probabilities honest; resampled "
-                  "models over-state how many customers will leave."])
+    with ui.panel("04", "How the imbalance was handled", "best out-of-fold F1 per approach, 5-fold cross-validation"):
+        a, b = st.columns([1.3, 1], gap="large")
+        with a:
+            st.dataframe(pd.DataFrame(ref["balancing"]), hide_index=True, width="stretch",
+                         column_config={"Best F1": st.column_config.NumberColumn(format="%.3f"),
+                                        "AUC-ROC": st.column_config.NumberColumn(format="%.3f")})
+        with b:
+            ui.notes(["Only 20% of customers leave. SMOTE, undersampling and class weights were compared, each inside the "
+                      "cross-validation folds, against simply <b>moving the threshold</b>.",
+                      "Moving the threshold was as good as any resampling, and keeps the probabilities honest; resampled "
+                      "models over-state how many customers will leave."])
 
-    ui.section("05", "Against the first version", "same 2,000 held-out customers")
-    e = ref["earlier"]
-    st.dataframe(pd.DataFrame({
-        "First version (random forest + SMOTE, 0.5)": [f"{e['F1']:.3f}", f"{e['AUC-ROC']:.3f}", f"{e['Recall']:.1%}",
-                                                       f"{e['Precision']:.1%}", f"{e['Mean prediction']:.0%}", f"{e['Brier']:.3f}"],
-        f"Retention Desk (XGBoost, {m.threshold:.2f})": [f"{s['F1']:.3f}", f"{s['AUC-ROC']:.3f}", f"{s['Recall']:.1%}",
-                                                         f"{s['Precision']:.1%}", f"{p.mean():.0%}", "0.101"],
-    }, index=["F1", "AUC-ROC", "Recall", "Precision", "Average predicted churn (actual 20%)", "Brier score (lower is better)"]),
-        width="stretch")
-    ui.caveat("The first model's F1 was close; what changed is that this result can be trusted (stratified split, no "
-              "leakage, threshold chosen out of fold) and that the probabilities match reality, which the deposits-at-risk "
-              "figures depend on.")
+    with ui.panel("05", "Against the first version", "same 2,000 held-out customers"):
+        e = ref["earlier"]
+        st.dataframe(pd.DataFrame({
+            "First version (random forest + SMOTE, 0.5)": [f"{e['F1']:.3f}", f"{e['AUC-ROC']:.3f}", f"{e['Recall']:.1%}",
+                                                           f"{e['Precision']:.1%}", f"{e['Mean prediction']:.0%}", f"{e['Brier']:.3f}"],
+            f"Retention Desk (XGBoost, {m.threshold:.2f})": [f"{s['F1']:.3f}", f"{s['AUC-ROC']:.3f}", f"{s['Recall']:.1%}",
+                                                             f"{s['Precision']:.1%}", f"{p.mean():.0%}", "0.101"],
+        }, index=["F1", "AUC-ROC", "Recall", "Precision", "Average predicted churn (actual 20%)", "Brier score (lower is better)"]),
+            width="stretch")
+        ui.caveat("The first model's F1 was close; what changed is that this result can be trusted (stratified split, no "
+                  "leakage, threshold chosen out of fold) and that the probabilities match reality, which the deposits-at-risk "
+                  "figures depend on.")
 
-    ui.section("06", "What the model relies on", "mean |SHAP| on held-out customers")
-    imp = ref["importance"]
-    charts.show(charts.importance([fmt.SHORT[k] for k in imp], list(imp.values())), "imp")
+    with ui.panel("06", "What the model relies on", "mean |SHAP| on held-out customers"):
+        imp = ref["importance"]
+        charts.show(charts.importance([fmt.SHORT[k] for k in imp], list(imp.values())), "imp")
     ui.footer()

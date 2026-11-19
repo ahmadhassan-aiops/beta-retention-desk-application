@@ -2,7 +2,7 @@
 
 **Live app:** [beta-retention-desk-application.streamlit.app](https://beta-retention-desk-application.streamlit.app/) · **Notebook and project folder:** [AIOPS-Portfolio-Projects](https://github.com/ahmadhassan-aiops/AIOPS-Portfolio-Projects/tree/main/2.%20Machine%20Learning%20Projects/customer%20attrition%20at%20Beta%20Bank%20using%20ML)
 
-A retention console for Beta Bank, by **Ahmad Hassan** (AI Engineer). Customers are leaving the bank little by
+A light-themed retention console for Beta Bank, by **Ahmad Hassan** (AI Engineer). Customers are leaving the bank little by
 little, and keeping them is cheaper than winning new ones. A tuned XGBoost pipeline, trained on 8,000 customers and
 tested once on 2,000 it never saw, **meets the brief with F1 0.631 (target 0.59) and AUC-ROC 0.864**, and its
 probabilities match real churn rates, so they can be multiplied by balances to show deposits at risk.

@@ -102,25 +102,24 @@ def render() -> None:
                 ui.caveat(f"<b>What happened:</b> this held-out customer {'left the bank' if left_bank else 'stayed'}. "
                           "The model never saw them in training.")
     with right:
-        ui.section("01", "Why this score", "largest effects first, in percentage points")
-        top = contrib.reindex(contrib.abs().sort_values(ascending=False).index)
-        shown = top[:6]
-        rest = float(top[6:].sum())
-        steps = [(fmt.SHORT[f], fmt.value(f, customer[f]), float(c)) for f, c in shown.items()]
-        if abs(rest) > 1e-6:
-            steps.append(("Other 4 factors", "combined", rest))
-        charts.show(charts.waterfall(to_prob(float(bias[0])), steps, p), "waterfall")
-        ui.caveat("Each bar is how much one fact moves the chance, starting from the average customer (SHAP values from "
-                  "the model, applied largest first). Coral raises the chance of leaving, teal lowers it.")
+        with ui.panel("01", "Why this score", "largest effects first, in percentage points"):
+            top = contrib.reindex(contrib.abs().sort_values(ascending=False).index)
+            shown = top[:6]
+            rest = float(top[6:].sum())
+            steps = [(fmt.SHORT[f], fmt.value(f, customer[f]), float(c)) for f, c in shown.items()]
+            if abs(rest) > 1e-6:
+                steps.append(("Other 4 factors", "combined", rest))
+            charts.show(charts.waterfall(to_prob(float(bias[0])), steps, p), "waterfall")
+            ui.caveat("Each bar is how much one fact moves the chance, starting from the average customer (SHAP values from "
+                      "the model, applied largest first). Coral raises the chance of leaving, teal lowers it.")
 
-    ui.section("02", "Retention levers", "what the model expects if the bank changes one thing")
-    levers = m.levers(row)
-    if levers:
-        with st.container(border=True):
+    with ui.panel("02", "Retention levers", "what the model expects if the bank changes one thing"):
+        levers = m.levers(row)
+        if levers:
             ui.levers(levers)
-    else:
-        ui.caveat("This customer is already active, has two products and a credit card: no lever left to pull.")
-    ui.play(_play(levers, status))
-    ui.caveat("<b>Read with care:</b> the model learned from what customers like this did, not from experiments. A lever "
-              "shows the score a customer with that profile would get; it is a guide to where to start, not a promise.")
+        else:
+            ui.caveat("This customer is already active, has two products and a credit card: no lever left to pull.")
+        ui.play(_play(levers, status))
+        ui.caveat("<b>Read with care:</b> the model learned from what customers like this did, not from experiments. A lever "
+                  "shows the score a customer with that profile would get; it is a guide to where to start, not a promise.")
     ui.footer()
