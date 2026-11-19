@@ -1,0 +1,108 @@
+{
+  "test": {
+    "Accuracy": 0.8465,
+    "Recall": 0.6437,
+    "Precision": 0.6179,
+    "F1": 0.6306,
+    "AUC-ROC": 0.8636,
+    "PR-AUC": 0.7111
+  },
+  "importance": {
+    "Age": 0.802,
+    "NumOfProducts": 0.77,
+    "IsActiveMember": 0.386,
+    "Geography": 0.26,
+    "Gender": 0.235,
+    "Balance": 0.21,
+    "EstimatedSalary": 0.104,
+    "CreditScore": 0.089,
+    "Tenure": 0.051,
+    "HasCrCard": 0.022
+  },
+  "calibration": {
+    "predicted": [
+      0.046,
+      0.1413,
+      0.2451,
+      0.3851,
+      0.592,
+      0.8067,
+      0.9423
+    ],
+    "observed": [
+      0.0453,
+      0.1416,
+      0.2547,
+      0.3865,
+      0.5954,
+      0.8447,
+      0.9679
+    ],
+    "customers": [
+      4086.0,
+      1427.0,
+      742.0,
+      753.0,
+      393.0,
+      412.0,
+      187.0
+    ]
+  },
+  "balancing": [
+    {
+      "Approach": "Threshold moving (no resampling)",
+      "Model": "Gradient boosting",
+      "Best F1": 0.628,
+      "AUC-ROC": 0.865
+    },
+    {
+      "Approach": "Undersampling",
+      "Model": "Gradient boosting",
+      "Best F1": 0.622,
+      "AUC-ROC": 0.861
+    },
+    {
+      "Approach": "Class weights",
+      "Model": "Random forest",
+      "Best F1": 0.62,
+      "AUC-ROC": 0.859
+    },
+    {
+      "Approach": "SMOTE oversampling",
+      "Model": "Gradient boosting",
+      "Best F1": 0.619,
+      "AUC-ROC": 0.861
+    }
+  ],
+  "tuned": [
+    {
+      "Model": "Gradient boosting",
+      "AUC-ROC": 0.8672,
+      "Std": 0.006,
+      "Best F1": 0.631,
+      "File (MB)": 0.3
+    },
+    {
+      "Model": "XGBoost (deployed)",
+      "AUC-ROC": 0.8669,
+      "Std": 0.006,
+      "Best F1": 0.629,
+      "File (MB)": 2.4
+    },
+    {
+      "Model": "Random forest",
+      "AUC-ROC": 0.8646,
+      "Std": 0.006,
+      "Best F1": 0.623,
+      "File (MB)": 20.0
+    }
+  ],
+  "earlier": {
+    "F1": 0.625,
+    "AUC-ROC": 0.86,
+    "Recall": 0.686,
+    "Precision": 0.574,
+    "Mean prediction": 0.33,
+    "Brier": 0.125
+  }
+}
