@@ -96,13 +96,5 @@
       "Best F1": 0.623,
       "File (MB)": 20.0
     }
-  ],
-  "earlier": {
-    "F1": 0.625,
-    "AUC-ROC": 0.86,
-    "Recall": 0.686,
-    "Precision": 0.574,
-    "Mean prediction": 0.33,
-    "Brier": 0.125
-  }
+  ]
 }

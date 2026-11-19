@@ -1,4 +1,4 @@
-"""Method: data, how the model was built and chosen, what was corrected, limits, links."""
+"""Method: data, how the model was built and chosen, limits, links."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ def render() -> None:
     m = data.model()
     ref = data.reference()
     ui.title("Method", "How the desk's model was built",
-             "Data, model search, the fixes made to the first version of the notebook, and what the model cannot do.")
+             "Data, model search, and what the model cannot do.")
 
     with ui.panel("01", "Data"):
         ui.notes([
@@ -43,21 +43,7 @@ def render() -> None:
             f"<b>{m.threshold:.2f}</b> maximises F1 on out-of-fold predictions.",
         ])
 
-    with ui.panel("03", "What was fixed in the first version"):
-        ui.notes([
-            "<b>No exploratory analysis.</b> Added: churn by age, products, activity, country, gender and balance.",
-            "<b>Tenure filled before the split</b> with the mean of all customers (so test data shaped training) and cut "
-            "to whole years. Now imputed inside the pipeline from training data only.",
-            "<b>Unstratified split.</b> Now stratified on the target.",
-            "<b>The XGBoost search did not tune anything:</b> pipeline-style parameter names were given to a bare model. "
-            "Fixed, and XGBoost went from 0.843 to 0.867 AUC-ROC.",
-            "<b>The chosen model contradicted the notebook's own comparison</b> (random forest chosen while gradient "
-            "boosting scored higher), and <b>the threshold was left at 0.5</b> although the target was F1.",
-            "<b>SMOTE inflated the probabilities</b> (33% average predicted churn against 20% real). The model is now "
-            "trained on the real balance and the threshold handles the imbalance.",
-        ])
-
-    with ui.panel("04", "Limits"):
+    with ui.panel("03", "Limits"):
         ui.notes([
             "<b>Associations, not causes.</b> The levers on the customer file show how the score changes, not a proven "
             "effect of an action. Test retention offers against a control group.",
@@ -67,7 +53,7 @@ def render() -> None:
             "terms, and check the bank's rules before use.",
         ])
 
-    with ui.panel("05", "Code and notebook"):
+    with ui.panel("04", "Code and notebook"):
         st.markdown(f"- [Notebook]({NOTEBOOK_URL}): EDA, balancing comparison, tuning, threshold, SHAP\n"
                     f"- [Project folder]({PROJECT_URL}) in the portfolio repository\n"
                     f"- [App code]({CODE_URL}): Streamlit app, `retention/` inference package, `train.py`, tests")

@@ -1,4 +1,4 @@
-"""Model scorecard: the F1 target, threshold trade-off, ROC, calibration, comparisons and importance."""
+"""Model scorecard: the F1 target, threshold trade-off, ROC, calibration, balancing and importance."""
 
 from __future__ import annotations
 
@@ -76,20 +76,7 @@ def render() -> None:
                       "Moving the threshold was as good as any resampling, and keeps the probabilities honest; resampled "
                       "models over-state how many customers will leave."])
 
-    with ui.panel("05", "Against the first version", "same 2,000 held-out customers"):
-        e = ref["earlier"]
-        st.dataframe(pd.DataFrame({
-            "First version (random forest + SMOTE, 0.5)": [f"{e['F1']:.3f}", f"{e['AUC-ROC']:.3f}", f"{e['Recall']:.1%}",
-                                                           f"{e['Precision']:.1%}", f"{e['Mean prediction']:.0%}", f"{e['Brier']:.3f}"],
-            f"Retention Desk (XGBoost, {m.threshold:.2f})": [f"{s['F1']:.3f}", f"{s['AUC-ROC']:.3f}", f"{s['Recall']:.1%}",
-                                                             f"{s['Precision']:.1%}", f"{p.mean():.0%}", "0.101"],
-        }, index=["F1", "AUC-ROC", "Recall", "Precision", "Average predicted churn (actual 20%)", "Brier score (lower is better)"]),
-            width="stretch")
-        ui.caveat("The first model's F1 was close; what changed is that this result can be trusted (stratified split, no "
-                  "leakage, threshold chosen out of fold) and that the probabilities match reality, which the deposits-at-risk "
-                  "figures depend on.")
-
-    with ui.panel("06", "What the model relies on", "mean |SHAP| on held-out customers"):
+    with ui.panel("05", "What the model relies on", "mean |SHAP| on held-out customers"):
         imp = ref["importance"]
         charts.show(charts.importance([fmt.SHORT[k] for k in imp], list(imp.values())), "imp")
     ui.footer()

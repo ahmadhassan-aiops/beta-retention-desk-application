@@ -15,8 +15,8 @@ probabilities match real churn rates, so they can be multiplied by balances to s
   adds a credit card, with a recommended play.
 - **Churn map**: age by country, age by activity, products, country and gender.
 - **Scorecard**: the F1 target check, an interactive act line with F1/recall/precision and the confusion matrix,
-  ROC, calibration, how class imbalance was handled, and a fair comparison with the first version's model.
-- **Method**: data, model search, fixes to the first notebook, limits.
+  ROC, calibration, and how class imbalance was handled.
+- **Method**: data, model search, limits.
 
 ## Why this stack
 

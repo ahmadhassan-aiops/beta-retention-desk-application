@@ -48,9 +48,6 @@ TUNED = [
     {"Model": "XGBoost (deployed)", "AUC-ROC": 0.8669, "Std": 0.006, "Best F1": 0.629, "File (MB)": 2.4},
     {"Model": "Random forest", "AUC-ROC": 0.8646, "Std": 0.006, "Best F1": 0.623, "File (MB)": 20.0},
 ]
-EARLIER = {"F1": 0.625, "AUC-ROC": 0.860, "Recall": 0.686, "Precision": 0.574, "Mean prediction": 0.33,
-           "Brier": 0.125}
-
 
 def build() -> Pipeline:
     prep = ColumnTransformer(
@@ -109,7 +106,7 @@ def main(csv: Path) -> None:
         "test": test,
         "importance": {k: round(float(v), 3) for k, v in contrib.abs().mean().sort_values(ascending=False).items()},
         "calibration": {k: [round(float(v), 4) for v in calib[k]] for k in calib.columns},
-        "balancing": BALANCING, "tuned": TUNED, "earlier": EARLIER,
+        "balancing": BALANCING, "tuned": TUNED,
     }
     (ROOT / "data" / "reference.json").write_text(json.dumps(reference, indent=2), encoding="utf-8")
     print(json.dumps(meta, indent=2))
