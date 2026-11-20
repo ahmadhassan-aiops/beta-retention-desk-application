@@ -26,7 +26,7 @@ h1, h2, h3 {{ font-family: var(--display); letter-spacing: -0.02em; }}
 [data-testid="stSidebar"] {{ border-right: 1px solid var(--line); }}
 [data-testid="stAppViewContainer"], [data-testid="stMain"] {{ background: var(--bg); }}
 [data-testid="stSidebar"] {{ background: #ffffff; }}
-[data-testid="stVerticalBlockBorderWrapper"] {{ border-color: var(--line) !important; border-radius: 12px !important;
+[data-testid="stVerticalBlock"][data-test-scroll-behavior] {{ border-color: var(--line) !important; border-radius: 12px !important;
                                               background: var(--panel); box-shadow: 0 1px 2px rgba(20, 26, 34, .05); }}
 .st-key-panel {{ margin-bottom: .4rem; }}
 
